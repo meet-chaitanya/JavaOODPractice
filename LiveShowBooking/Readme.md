@@ -1,0 +1,1 @@
+You are required to build an application that lets users book for Live Shows. The day is divided into time slots of 1 hour each, starting from 9 am to 9 pm. Organizers of Live Shows can login to the portal and declare their show timings with the capacity for the given day. Users can login and book tickets for a particular live show / cancel existing bookings. 
