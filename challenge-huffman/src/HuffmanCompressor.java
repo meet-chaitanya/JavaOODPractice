@@ -1,57 +1,10 @@
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.PriorityQueue;
 
 public class HuffmanCompressor {
 
-    static class FrequencyTable {
-        Map<Character, Integer> frequencies;
 
-        public FrequencyTable() {
-            frequencies = new HashMap<>();
-        }
-
-        public void addCharacter(char c) {
-            frequencies.put(c, frequencies.getOrDefault(c, 0) + 1);
-        }
-
-        public void serialize(DataOutputStream out) throws IOException {
-            out.writeInt(frequencies.size());
-
-            for (Map.Entry<Character, Integer> entry: frequencies.entrySet()) {
-                out.writeChar(entry.getKey());
-                out.writeInt(entry.getValue());
-            }
-        }
-
-        static FrequencyTable fromInputStream(InputStream inputStream) throws IOException {
-            FrequencyTable table = new FrequencyTable();
-            int c;
-            while ((c = inputStream.read()) != -1) {
-                table.addCharacter((char) c);
-            }
-            return table;
-        }
-    }
-
-    private static HuffTree buildHuffmanTree(FrequencyTable frequencyTable) {
-
-        PriorityQueue<HuffTree> pq = new PriorityQueue<>();
-        for (Map.Entry<Character, Integer> entry: frequencyTable.frequencies.entrySet()) {
-            pq.add(new HuffTree(entry.getKey(), entry.getValue()));
-        }
-
-        while (pq.size() > 1) {
-            HuffTree tree1 = pq.poll();
-            HuffTree tree2 = pq.poll();
-
-            HuffTree mergeTree = new HuffTree(tree1.weight() + tree2.weight(), tree1.getRoot(), tree2.getRoot());
-            pq.add(mergeTree);
-        }
-
-        return pq.poll();
-    }
 
     private static void generateHuffmanCodes(HuffBaseNode node, String prefix, Map<Character, String> huffmanCodes) {
         if (node.isLeaf()) {
@@ -67,12 +20,13 @@ public class HuffmanCompressor {
     public static void compress(String inputFileName, String outputFileName) throws IOException{
         // Build Frequency table
         FileInputStream inputFile = new FileInputStream(inputFileName);
-        FrequencyTable frequencyTable = FrequencyTable.fromInputStream(inputFile);
+        FrequencyTable frequencyTable = new FrequencyTable();
+        frequencyTable.fromInputStream(inputFile);
 
         inputFile.close();
 
         // Build HuffmanTree from frequency table
-        HuffTree huffmanTree = buildHuffmanTree(frequencyTable);
+        HuffTree huffmanTree = frequencyTable.buildHuffmanTree();
 
         Map<Character, String> huffmanCodes = new HashMap<>();
         generateHuffmanCodes(huffmanTree.getRoot(), "", huffmanCodes);
